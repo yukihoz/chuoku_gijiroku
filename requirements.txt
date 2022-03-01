@@ -7,3 +7,4 @@ streamlit==1.5.1
 streamlit-aggrid==0.2.3.post2
 wordcloud==1.8.1
 mecab-python3==1.0.5
+unidic-lite==1.0.8
