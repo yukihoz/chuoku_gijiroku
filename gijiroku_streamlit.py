@@ -1,11 +1,11 @@
-from tracemalloc import start
-from turtle import window_width
+#from tracemalloc import start
+#from turtle import window_width
 import numpy as np
 from st_aggrid import AgGrid
 import pandas as pd
 import streamlit as st
 import pydeck as pdk #3Dマッピング
-import plotly.express as px 
+#import plotly.express as px 
 import MeCab
 mecab = MeCab.Tagger()
 import matplotlib.pyplot as plt
