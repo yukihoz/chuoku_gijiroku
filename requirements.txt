@@ -5,4 +5,4 @@ plotly==5.6.0
 pydeck==0.7.1
 streamlit==1.5.1
 wordcloud==1.8.1
-MeCab==0.996.3
+mecab-python3==1.0.5
