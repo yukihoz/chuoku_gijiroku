@@ -14,7 +14,7 @@ font_path = 'Corporate-Logo-Bold-ver2.otf'
 
 #pd.set_option('display.max_colwidth', 0)
 
-st.set_page_config(layout="wide")
+#st.set_page_config(layout="wide")
 st.title('中央区の区議会')
 
 logs = pd.read_csv('./議事録2015-2019u.csv', encoding='UTF-8')#df_jp_indとしてDFで読み込み
