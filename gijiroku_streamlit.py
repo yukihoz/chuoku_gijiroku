@@ -1,44 +1,46 @@
-#from tracemalloc import start
-#from turtle import window_width
-import numpy as np
 from st_aggrid import AgGrid
 import pandas as pd
 import streamlit as st
-import pydeck as pdk #3Dマッピング
-#import plotly.express as px 
+
 import MeCab
 mecab = MeCab.Tagger()
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
 font_path = 'Corporate-Logo-Bold-ver2.otf'
 import altair as alt
-
-#pd.set_option('display.max_colwidth', 0)
+import datetime
 
 st.set_page_config(layout="wide")
-st.title('中央区議会の議事録ビジュアライズ@streamlit')
-st.markdown('中央区議会のWebサイトから議事録のデータを抽出して、ワードクラウドを作ってみました。'
-)
+st.title(':face_with_monocle:  議会の議事録ビジュアライズ(β)@中央区')
+st.subheader('「この政治家、どういう考えの人なんだろ？？」と思っても、議会の議事録とか眺めるのしんどいよね…')
+st.markdown('　政治家の人たち、SNSで発信している人も最近は増えてきてますが、よく分からない人の方が多いというのが実際のところではないでしょうか。一応議会とかに出席してあれこれやってるんだろうけど、その議事録とか見るのはだらだら長くてしんどい。')
+st.markdown('　そういう人向けに、政治家の方々が議会でどういう発言をされているのかについて、文字解析の技術で1枚の画像としてざっくりと可視化してみようというサービスを作ってみました（いわゆるワードクラウドというやつ）。')
+st.markdown('　対象はわたしの住んでる東京都中央区議会で、2015年度5月から2021年度10月まで。')
+st.markdown('　python + streamlitで作ってます。超初心者の習作なもので色々ツッコミどころはあるかと思います。こうすればもっと良いよ！とか教えてもらえると嬉しいです。一緒にやろうよ！という人がいてくれるともっと嬉しいです。')
+st.markdown('**作った人：[ほづみゆうき](https://twitter.com/ninofku)**')
 
 logs = pd.read_csv('./gijiroku2015-2021.csv', encoding='UTF-8')#dataframeとしてcsvを読み込み
-#giin_list = logs['人分類'].unique()
 giin_list_temp = pd.read_csv('./giin2015-2021.csv', encoding='UTF-8')
 giin_list = giin_list_temp['氏名']
 
 iinkai_list_temp = pd.read_csv('./iinkai2015-2021.csv', encoding='UTF-8')
 iinkai_list = iinkai_list_temp['委員会']
 
-st.header('■ワードクラウド')
+st.header(':clipboard: 使い方')
+st.markdown('　「:fork_and_knife: 検索条件」で条件を設定すると、その下の「:cake: 結果表示」に結果が表示されますよ。')
+st.markdown('　基本的には政治家の名前を選択すればオッケー、もっと細かく見たければ「会議体」とか「年度」とかで絞ってみてください。')
 
+st.header(':fork_and_knife: 検索条件')
 # 議員選択
-option_selected_g = st.sidebar.selectbox(
-    'どれか選択してね',
+option_selected_g = st.selectbox(
+    '政治家の名前をどれか選択してください。選んだ政治家の結果が表示されます。',
     giin_list
 )
 
 #委員会選択
-option_selected_i = st.sidebar.multiselect(
-    'どれか選択してね',
+st.markdown(' #### :books:「会議体」での絞り込み')
+option_selected_i = st.multiselect(
+    '「XXXX委員会」とかの会議体で結果を絞りたい場合は使ってみてください。初期値では全部が選択されてます。',
     iinkai_list,
     ['臨時会','環境建設委員会','企画総務委員会','区民文教委員会','少子高齢化対策特別委員会','築地等まちづくり及び地域活性化対策特別委員会','東京オリンピック・パラリンピック対策特別委員会','福祉保健委員会','防災等安全対策特別委員会','定例会','決算特別委員会','予算特別委員会','子ども子育て・高齢者対策特別委員会','築地等地域活性化対策特別委員会','全員協議会','コロナウイルス・防災等対策特別委員会','懲罰特別委員会','東京2020大会・晴海地区公共施設整備対策特別委員会'])
 
@@ -50,25 +52,19 @@ f.writelines(option_selected_i)
 f.close()
 option_selected_i_txt = open("temp_iinkai.txt", encoding="utf8").read()
 
+st.markdown(' #### :date:「年度」での絞り込み')
 #年度選択
-start_year, end_year = st.sidebar.select_slider(
-     '対象年度を選んでね',
+start_year, end_year = st.select_slider(
+    '最近の動向を知りたいとか、対象の年度で結果を絞りたい場合は使ってみてください。初期値では全部の年度が選択されてます。',
      options=['2015', '2016', '2017', '2018', '2019', '2020', '2021'],
      value=('2015', '2021'))
 
 start_year = int(start_year)
 end_year = int(end_year)
 
-#pd.to_numeric(start_year)
 
-#pd.to_numeric(end_year)
-#logs['年度'] = logs['年度'].astype(int)
-
-
-#pd.set_option('display.max_rows', 10000)
 
 logs_contents_temp = logs[(logs['人分類'].str.contains(option_selected_g)) & (logs['委員会'].str.contains(option_selected_i_txt)) & (logs['内容分類']== "質問" ) & (logs['年度'] >= start_year) & (logs['年度'] <= end_year)]
-#logs_contents_temp = logs[(logs['人分類'].str.contains(option_selected_g)) & (logs['内容分類']== "質問" ) & (logs['年度'] >= start_year) & (logs['年度'] <= end_year)]
 
 logs_contents_temp_show = logs_contents_temp[["年月日","会議","内容"]]
 
@@ -77,37 +73,23 @@ logs_contents_temp_moji = logs_contents_temp.groupby('年度').sum()# 年度ご�
 #文字カウント
 logs_contents_temp_moji = logs_contents_temp_moji['文字数']
 
-#logs_contents_temp_moji = logs_contents_temp.sum(level=2)
-#logs_contents_temp_moji = pd.DataFrame({'value': df.loc[logs_contents_temp['年度'] == "2015"],logs_contents_temp['文字数'].sum(),
-#                                        'value': logs_contents_temp['文字数'][logs_contents_temp['年度'] == "2016"].sum(),
-#                                        'value': logs_contents_temp['文字数'][logs_contents_temp['年度'] == "2017"].sum(),
-#                                        'value': logs_contents_temp['文字数'][logs_contents_temp['年度'] == "2018"].sum(),
-#                                        'value': logs_contents_temp['文字数'][logs_contents_temp['年度'] == "2019"].sum(),
-#                                        'value': logs_contents_temp['文字数'][logs_contents_temp['年度'] == "2020"].sum()},
-#                                        index = ['2015','2016','2017','2018','2019','2020'])
-
+st.header(':cake: 結果表示')
+st.markdown('　「:fork_and_knife: 検索条件」で設定した範囲での発言内容についての結果が表示されます。')
+st.markdown('　#### :chart_with_upwards_trend: 年度単位での発言文字数の推移')
+st.markdown('　それぞれの年度でどの程度発言されているのかを推移を示したものです。')
 #チャート作成
-st.bar_chart(logs_contents_temp_moji
-            )
-
-#c = alt.Chart(logs_contents_temp_moji).mark_bar().encode(
-#     x='', y='文字数', tooltip=['年度', '文字数'])
-#st.altair_chart(c, use_container_width=True)
+st.bar_chart(logs_contents_temp_moji)
 
 
 # ワードクラウド作成
 logs_contents = logs_contents_temp['内容']
 
-#logs_contents = logs['内容'][logs['人分類'].str.contains('|'.join(option_selected_g))]
-
 f = open('temp.txt', 'w')#textに書き込み
 f.writelines(logs_contents)
 f.close()
 
-#logs_contents_s = str(logs_contents)
 text = open("temp.txt", encoding="utf8").read()
-#text['列文字数'] = list(map(len, text['内容']))
-#results = mecab.parse(logs_contents_s)
+
 results = mecab.parse(text)
 result = results.split('\n')[:-2][0]
 
@@ -116,9 +98,14 @@ for result in results.split('\n')[:-2]:
         if '名詞' in result.split('\t')[4]:
             nouns.append(result.split('\t')[0])
 words = ' '.join(nouns)
-
 #集計文字数表示
 st.metric(label="発言文字数", value=len(text))
+
+
+st.markdown('　#### :face_with_monocle: 文字解析の結果')
+st.markdown('　文字解析の結果です。更新するたびにビミョーに変わります。対象は名詞だけで、「それぞれ」や「問題」など、頻繁に使われるけど中身のないキーワードは除外してます。')
+dt_now = datetime.datetime.now()
+st.write('**[政治家名]**',option_selected_g, '**[対象年度]**',start_year,'-',end_year,'**[作成日時]**',dt_now)
 
 stpwds = ["様","辺","なし","分","款","皆","さん","議会","文","場所","現在","ら","方々","こちら","性","化","場合","対象","一方","皆様","考え","それぞれ","意味","とも","内容","とおり","目","事業","つ","見解","検討","本当","議論","民","地域","万","確認","実際","先ほど","前","後","利用","説明","次","あたり","部分","状況","わけ","話","答弁","資料","半ば","とき","支援","形","今回","中","対応","必要","今後","質問","取り組み","終了","暫時","午前","たち","九十","八十","七十","六十","五十","四十","三十","問題","提出","進行","付託","議案","動議","以上","程度","異議","開会","午後","者","賛成","投票","再開","休憩","質疑","ただいま","議事","号","二十","平成","等","会","日","月","年","年度","委員","中央","点","区","委員会","賛成者","今","中央区","もの","こと","ふう","ところ","ほう","これ","私","わたし","僕","あなた","みんな","ただ","ほか","それ", "もの", "これ", "ところ","ため","うち","ここ","そう","どこ", "つもり", "いつ","あと","もん","はず","こと","そこ","あれ","なに","傍点","まま","事","人","方","何","時","一","二","三","四","五","六","七","八","九","十"]
 
@@ -126,18 +113,12 @@ wc = WordCloud(stopwords=stpwds, width=1280, height=720, background_color='white
 wc.generate(words)
 wc.to_file('wc.png')
 st.image('wc.png')
-#plt.imshow(wc)
-#logs_contents
-#st.text(logs_contents_s)
-#results
-
-#logs_moji = pd.read_csv('./議事録2015-2019suma.csv', encoding='UTF-8')#df_jp_indとしてDFで読み込み
-
-#selected_g = logs2 [(logs2['人分類'].str.contains(option_selected_g))]
-
 
 
 #table作成
+st.markdown('　#### :open_book: 解析対象の文字列')
+st.markdown('　上記の解析結果の対象となった文字列です。もうちょい細かく見たいこともあるかと思い表示させてみました（改行がうまくできてなくてすいません…）')
+
 grid_options = {
     "columnDefs":[
     {
@@ -165,6 +146,8 @@ grid_options = {
     },
 ],
 }
-
 AgGrid(logs_contents_temp_show, grid_options)
 
+
+st.markdown('**情報参照元**：[中央区議会 Webサイト](https://www.kugikai.city.chuo.lg.jp/index.html)')
+st.markdown('※ 上記URLの「会議録検索」からHTMLファイルをごっそりダウンロードして、これをごにょごにょ加工して元データを作成しています。注意して作業はしたつもりですが、データが欠損等している可能性もありますのでご承知おきください。')
