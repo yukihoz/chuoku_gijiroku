@@ -11,25 +11,50 @@ mecab = MeCab.Tagger()
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
 font_path = 'Corporate-Logo-Bold-ver2.otf'
+import altair as alt
 
 #pd.set_option('display.max_colwidth', 0)
 
-#st.set_page_config(layout="wide")
-st.title('中央区の区議会')
+st.set_page_config(layout="wide")
+st.title('中央区議会の議事録ビジュアライズ@streamlit')
+st.markdown('中央区議会のWebサイトから議事録のデータを抽出して、ワードクラウドを作ってみました。'
+)
 
-logs = pd.read_csv('./議事録2015-2019u.csv', encoding='UTF-8')#df_jp_indとしてDFで読み込み
-giin_list = logs['人分類'].unique()
+logs = pd.read_csv('./gijiroku2015-2021.csv', encoding='UTF-8')#dataframeとしてcsvを読み込み
+#giin_list = logs['人分類'].unique()
+giin_list_temp = pd.read_csv('./giin2015-2021.csv', encoding='UTF-8')
+giin_list = giin_list_temp['氏名']
+
+iinkai_list_temp = pd.read_csv('./iinkai2015-2021.csv', encoding='UTF-8')
+iinkai_list = iinkai_list_temp['委員会']
 
 st.header('■ワードクラウド')
-option_selected_g = st.selectbox(
+
+# 議員選択
+option_selected_g = st.sidebar.selectbox(
     'どれか選択してね',
     giin_list
 )
 
-start_year, end_year = st.select_slider(
+#委員会選択
+option_selected_i = st.sidebar.multiselect(
+    'どれか選択してね',
+    iinkai_list,
+    ['臨時会','環境建設委員会','企画総務委員会','区民文教委員会','少子高齢化対策特別委員会','築地等まちづくり及び地域活性化対策特別委員会','東京オリンピック・パラリンピック対策特別委員会','福祉保健委員会','防災等安全対策特別委員会','定例会','決算特別委員会','予算特別委員会','子ども子育て・高齢者対策特別委員会','築地等地域活性化対策特別委員会','全員協議会','コロナウイルス・防災等対策特別委員会','懲罰特別委員会','東京2020大会・晴海地区公共施設整備対策特別委員会'])
+
+option_selected_i = '|'.join(option_selected_i)
+
+#委員会選択のテキスト化（後の条件付けのため
+f = open('temp_iinkai.txt', 'w')#textに書き込み
+f.writelines(option_selected_i)
+f.close()
+option_selected_i_txt = open("temp_iinkai.txt", encoding="utf8").read()
+
+#年度選択
+start_year, end_year = st.sidebar.select_slider(
      '対象年度を選んでね',
      options=['2015', '2016', '2017', '2018', '2019', '2020', '2021'],
-     value=('2015', '2019'))
+     value=('2015', '2021'))
 
 start_year = int(start_year)
 end_year = int(end_year)
@@ -40,9 +65,10 @@ end_year = int(end_year)
 #logs['年度'] = logs['年度'].astype(int)
 
 
-pd.set_option('display.max_rows', 10000)
+#pd.set_option('display.max_rows', 10000)
 
-logs_contents_temp = logs[(logs['人分類'].str.contains(option_selected_g)) & (logs['内容分類']== "質問" ) & (logs['年度'] >= start_year) & (logs['年度'] <= end_year)]
+logs_contents_temp = logs[(logs['人分類'].str.contains(option_selected_g)) & (logs['委員会'].str.contains(option_selected_i_txt)) & (logs['内容分類']== "質問" ) & (logs['年度'] >= start_year) & (logs['年度'] <= end_year)]
+#logs_contents_temp = logs[(logs['人分類'].str.contains(option_selected_g)) & (logs['内容分類']== "質問" ) & (logs['年度'] >= start_year) & (logs['年度'] <= end_year)]
 
 logs_contents_temp_show = logs_contents_temp[["年月日","会議","内容"]]
 
@@ -63,7 +89,12 @@ logs_contents_temp_moji = logs_contents_temp_moji['文字数']
 #チャート作成
 st.bar_chart(logs_contents_temp_moji
             )
-            
+
+#c = alt.Chart(logs_contents_temp_moji).mark_bar().encode(
+#     x='', y='文字数', tooltip=['年度', '文字数'])
+#st.altair_chart(c, use_container_width=True)
+
+
 # ワードクラウド作成
 logs_contents = logs_contents_temp['内容']
 
@@ -89,7 +120,7 @@ words = ' '.join(nouns)
 #集計文字数表示
 st.metric(label="発言文字数", value=len(text))
 
-stpwds = ["議会","文","場所","現在","ら","方々","こちら","性","化","場合","対象","一方","皆様","考え","それぞれ","意味","とも","内容","とおり","目","事業","つ","見解","検討","本当","議論","民","地域","万","確認","実際","先ほど","前","後","利用","説明","次","あたり","部分","状況","わけ","話","答弁","資料","半ば","とき","支援","形","今回","中","対応","必要","今後","質問","取り組み","終了","暫時","午前","たち","九十","八十","七十","六十","五十","四十","三十","問題","提出","進行","付託","議案","動議","以上","程度","異議","開会","午後","者","賛成","投票","再開","休憩","質疑","ただいま","議事","号","二十","平成","等","会","日","月","年","年度","委員","中央","点","区","委員会","賛成者","今","中央区","もの","こと","ふう","ところ","ほう","これ","私","わたし","僕","あなた","みんな","ただ","ほか","それ", "もの", "これ", "ところ","ため","うち","ここ","そう","どこ", "つもり", "いつ","あと","もん","はず","こと","そこ","あれ","なに","傍点","まま","事","人","方","何","時","一","二","三","四","五","六","七","八","九","十"]
+stpwds = ["様","辺","なし","分","款","皆","さん","議会","文","場所","現在","ら","方々","こちら","性","化","場合","対象","一方","皆様","考え","それぞれ","意味","とも","内容","とおり","目","事業","つ","見解","検討","本当","議論","民","地域","万","確認","実際","先ほど","前","後","利用","説明","次","あたり","部分","状況","わけ","話","答弁","資料","半ば","とき","支援","形","今回","中","対応","必要","今後","質問","取り組み","終了","暫時","午前","たち","九十","八十","七十","六十","五十","四十","三十","問題","提出","進行","付託","議案","動議","以上","程度","異議","開会","午後","者","賛成","投票","再開","休憩","質疑","ただいま","議事","号","二十","平成","等","会","日","月","年","年度","委員","中央","点","区","委員会","賛成者","今","中央区","もの","こと","ふう","ところ","ほう","これ","私","わたし","僕","あなた","みんな","ただ","ほか","それ", "もの", "これ", "ところ","ため","うち","ここ","そう","どこ", "つもり", "いつ","あと","もん","はず","こと","そこ","あれ","なに","傍点","まま","事","人","方","何","時","一","二","三","四","五","六","七","八","九","十"]
 
 wc = WordCloud(stopwords=stpwds, width=1280, height=720, background_color='white', font_path = font_path)
 wc.generate(words)
