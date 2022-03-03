@@ -8,7 +8,9 @@ import matplotlib.pyplot as plt
 from wordcloud import WordCloud
 font_path = 'Corporate-Logo-Bold-ver2.otf'
 import altair as alt
-import datetime
+#import datetime
+from datetime import datetime, timedelta, timezone
+
 
 st.set_page_config(layout="wide")
 st.title(':face_with_monocle:  議会の議事録ビジュアライズ(β)@中央区')
@@ -95,7 +97,10 @@ for result in results.split('\n')[:-2]:
 words = ' '.join(nouns)
 
 #st.markdown('　#### :face_with_monocle: 文字解析の結果')
-dt_now = datetime.datetime.now()
+JST = timezone(timedelta(hours=+9), 'JST')
+#dt_now = datetime.datetime.now()
+dt_now = datetime.now(JST)
+
 st.write('**[政治家名]**',option_selected_g, '**[対象年度]**',start_year,'-',end_year,'**[作成日時]**',dt_now)
 
 stpwds = ["様","辺","なし","分","款","皆","さん","議会","文","場所","現在","ら","方々","こちら","性","化","場合","対象","一方","皆様","考え","それぞれ","意味","とも","内容","とおり","目","事業","つ","見解","検討","本当","議論","民","地域","万","確認","実際","先ほど","前","後","利用","説明","次","あたり","部分","状況","わけ","話","答弁","資料","半ば","とき","支援","形","今回","中","対応","必要","今後","質問","取り組み","終了","暫時","午前","たち","九十","八十","七十","六十","五十","四十","三十","問題","提出","進行","付託","議案","動議","以上","程度","異議","開会","午後","者","賛成","投票","再開","休憩","質疑","ただいま","議事","号","二十","平成","等","会","日","月","年","年度","委員","中央","点","区","委員会","賛成者","今","中央区","もの","こと","ふう","ところ","ほう","これ","私","わたし","僕","あなた","みんな","ただ","ほか","それ", "もの", "これ", "ところ","ため","うち","ここ","そう","どこ", "つもり", "いつ","あと","もん","はず","こと","そこ","あれ","なに","傍点","まま","事","人","方","何","時","一","二","三","四","五","六","七","八","九","十"]
