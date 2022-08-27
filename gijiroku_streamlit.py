@@ -2,12 +2,13 @@ import random
 from st_aggrid import AgGrid
 import pandas as pd
 import streamlit as st
+from collections import Counter
 
 import MeCab
 mecab = MeCab.Tagger()
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
-font_path = 'Corporate-Logo-Bold-ver2.otf'
+font_path = 'ShipporiMinchoB1-ExtraBold.ttf'
 import altair as alt
 #import datetime
 from datetime import datetime, timedelta, timezone
@@ -22,7 +23,7 @@ st.markdown('　対象はわたしの住んでる東京都中央区議会、期�
 st.markdown('　python + streamlitで作ってます。超初心者の習作なもので色々ツッコミどころはあるかと思います。こうすればもっと良いよ！とか教えてもらえると嬉しいです。一緒にやろうよ！という人がいてくれるともっと嬉しいです。コメント、ツッコミはお気軽に。')
 st.markdown('**作った人：[ほづみゆうき](https://twitter.com/ninofku)**')
 
-logs = pd.read_csv('./gijiroku2015-2021.csv', encoding='UTF-8')#dataframeとしてcsvを読み込み
+logs = pd.read_csv('./gijiroku2015-2022.5.csv', encoding='UTF-8')#dataframeとしてcsvを読み込み
 giin_list_temp = pd.read_csv('./giin2015-2021.csv', encoding='UTF-8')
 giin_list = giin_list_temp['氏名']
 
@@ -73,8 +74,8 @@ with st.expander("■「年度」での絞り込み", False):
 #年度選択
     start_year, end_year = st.select_slider(
     '最近の動向を知りたいとか、対象の年度で結果を絞りたい場合は使ってみてください。初期値では全部の年度が選択されてます。',
-     options=['2015', '2016', '2017', '2018', '2019', '2020', '2021'],
-     value=('2015', '2021'))
+     options=['2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022'],
+     value=('2019', '2022'))
     st.markdown('　※ 政治家を選択せずに絞り込みを設定すると勝手に人が変わっちゃいます。その場合は政治家を選択してください。')
 
 start_year = int(start_year)
@@ -118,9 +119,17 @@ dt_now = datetime.now(JST)
 
 st.write('**[政治家名]**',option_selected_g, '**[対象年度]**',start_year,'-',end_year,'**[作成日時]**',dt_now)
 
-stpwds = ["面","令和","様","辺","なし","分","款","皆","さん","議会","文","場所","現在","ら","方々","こちら","性","化","場合","対象","一方","皆様","考え","それぞれ","意味","とも","内容","とおり","目","事業","つ","見解","検討","本当","議論","民","地域","万","確認","実際","先ほど","前","後","利用","説明","次","あたり","部分","状況","わけ","話","答弁","資料","半ば","とき","支援","形","今回","中","対応","必要","今後","質問","取り組み","終了","暫時","午前","たち","九十","八十","七十","六十","五十","四十","三十","問題","提出","進行","付託","議案","動議","以上","程度","異議","開会","午後","者","賛成","投票","再開","休憩","質疑","ただいま","議事","号","二十","平成","等","会","日","月","年","年度","委員","中央","点","区","委員会","賛成者","今","中央区","もの","こと","ふう","ところ","ほう","これ","私","わたし","僕","あなた","みんな","ただ","ほか","それ", "もの", "これ", "ところ","ため","うち","ここ","そう","どこ", "つもり", "いつ","あと","もん","はず","こと","そこ","あれ","なに","傍点","まま","事","人","方","何","時","一","二","三","四","五","六","七","八","九","十"]
+stpwds = ["視点","視点","認識","取組","辺り","具体","面","令和","様","辺","なし","分","款","皆","さん","議会","文","場所","現在","ら","方々","こちら","性","化","場合","対象","一方","皆様","考え","それぞれ","意味","とも","内容","とおり","目","事業","つ","見解","検討","本当","議論","民","地域","万","確認","実際","先ほど","前","後","利用","説明","次","あたり","部分","状況","わけ","話","答弁","資料","半ば","とき","支援","形","今回","中","対応","必要","今後","質問","取り組み","終了","暫時","午前","たち","九十","八十","七十","六十","五十","四十","三十","問題","提出","進行","付託","議案","動議","以上","程度","異議","開会","午後","者","賛成","投票","再開","休憩","質疑","ただいま","議事","号","二十","平成","等","会","日","月","年","年度","委員","中央","点","区","委員会","賛成者","今","中央区","もの","こと","ふう","ところ","ほう","これ","私","わたし","僕","あなた","みんな","ただ","ほか","それ", "もの", "これ", "ところ","ため","うち","ここ","そう","どこ", "つもり", "いつ","あと","もん","はず","こと","そこ","あれ","なに","傍点","まま","事","人","方","何","時","一","二","三","四","五","六","七","八","九","十"]
 
-wc = WordCloud(stopwords=stpwds, width=1080, height=1080, background_color='white', font_path = font_path)
+wc = WordCloud(stopwords=stpwds, 
+    width=1000, 
+    height=1000, 
+    background_color='white',
+    colormap='Dark2',
+    #colormap='coolwarm', 
+    font_path = font_path
+)
+#wc = WordCloud(stopwords=stpwds, width=1080, height=1080, background_color='white', font_path = font_path)
 wc.generate(words)
 wc.to_file('wc.png')
 st.image('wc.png')
@@ -166,6 +175,26 @@ with st.expander("■ 解析対象の文字列", False):
     ],
     }
     AgGrid(logs_contents_temp_show, grid_options)
+
+
+#print(text.most_common(5))
+#text2 = collections.Counter(text)
+#textcount = print(len(text2))
+#textcount
+#textlist = list(text)
+#textlist
+#mycounter = Counter(textlist)
+#print(mycounter)
+
+#line = input(words).rstrip().split(' ')
+#count = Counter(line)
+#for k,v in count.items():
+#    print("%s = %d個" %(k,v))
+
+#print(words.most_common(5))
+#print('occurrence of letter 待機児童:', words.count('待機児童'))
+print('occurrence of substring ats:', words.count('ats'))
+
 
 st.header(':paperclip: 情報参照元')
 st.markdown('分析の元になっているデータは、[中央区議会 Webサイト](https://www.kugikai.city.chuo.lg.jp/index.html)の「会議録検索」からHTMLファイルをごっそりダウンロードして、その上であれこれ苦心して加工して作成しました。注意して作業はしたつもりですが、一部のデータが欠損等している可能性もありますのでご承知おきください。もし不備等ありましたら[ほづみゆうき](https://twitter.com/ninofku)まで声掛けいただけるとありがたいです。')
