@@ -15,12 +15,12 @@ from datetime import datetime, timedelta, timezone
 
 
 st.set_page_config(layout="wide")
-st.title(':face_with_monocle:  議会の議事録ビジュアライズ(β)@中央区')
+st.title(':face_with_monocle:  議会見える化プロジェクト(β)@東京都中央区')
 st.subheader('「この政治家、どういう考えの人なんだろ？？」と思っても、議会の議事録とか眺めるのしんどいよね…:dizzy_face:')
-st.markdown('　SNSとかで発信している政治家も最近は増えてきてますが、何やってるかよく分からない人の方が多いというのが実際のところではないでしょうか。一応議会とかに出席してあれこれやってるんだろうけど、その議事録とか見るのはだらだら長くてしんどい。')
-st.markdown('　そういう人向けに、政治家の方々が議会でどういう発言をされているのかについて「文字解析の技術で1枚の画像としてざっくりと可視化してみよう！」というサービスを作ってみました（いわゆるワードクラウドというやつ）。')
-st.markdown('　対象はわたしの住んでる東京都中央区議会、期間は2022年3月時点で入手できた2015年5月から2021年10月まで。')
-st.markdown('　python + streamlitで作ってます。超初心者の習作なもので色々ツッコミどころはあるかと思います。こうすればもっと良いよ！とか教えてもらえると嬉しいです。一緒にやろうよ！という人がいてくれるともっと嬉しいです。コメント、ツッコミはお気軽に。')
+st.markdown('　政治家って何やってるの？と思っても、、議会の議事録とか見るのはだらだら長くてしんどい。')
+st.markdown('　そんな人向けに、政治家の議会での発言を1枚の画像で表示してみよう！」というサービスを作ってみました（いわゆるワードクラウドというやつ）。')
+st.markdown('　対象はわたしの住んでる東京都中央区議会、期間は2022年3月時点で入手できた2015年5月から2022年5月まで。')
+#st.markdown('　python + streamlitで作ってます。超初心者の習作なもので色々ツッコミどころはあるかと思います。こうすればもっと良いよ！とか教えてもらえると嬉しいです。一緒にやろうよ！という人がいてくれるともっと嬉しいです。コメント、ツッコミはお気軽に。')
 st.markdown('**作った人：[ほづみゆうき](https://twitter.com/ninofku)**')
 
 logs = pd.read_csv('./gijiroku2015-2022.5.csv', encoding='UTF-8')#dataframeとしてcsvを読み込み
@@ -34,13 +34,19 @@ st.header(':clipboard: 使い方')
 st.markdown('　政治家がランダムに選択され、その政治家のテキスト解析結果が「:cake: 結果表示」に表示されてます。下の「ランダム選択」ボタンを押すと別の人に変わります。')
 st.markdown('　「:fork_and_knife: 検索条件」で条件を設定すると、政治家を選択したり「会議体」や「年度」で絞ったりなんかもできます。')
 
-# ランダム議員選択
+
+# 初期表示でのランダム議員選択
 option_selected_g_temp = random.choice(giin_list)
 
+# ボタンを押すとランダムで選択
 if st.button('ランダム選択'):
     option_selected_g = option_selected_g_temp
 else:
     option_selected_g = option_selected_g_temp
+
+
+
+
 
 
 st.header(':fork_and_knife: 検索条件')
@@ -52,6 +58,9 @@ if choice:
         '政治家の名前をどれか選択してください。選んだ政治家の結果が表示されます。',
         giin_list
     )
+
+# 選択した議員の名前をURLに表示
+st.experimental_set_query_params(giin=str(option_selected_g))
 
 #委員会選択
 with st.expander("■「会議体」での絞り込み", False):
