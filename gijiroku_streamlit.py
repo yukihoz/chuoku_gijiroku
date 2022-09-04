@@ -3,6 +3,7 @@ from st_aggrid import AgGrid
 import pandas as pd
 import streamlit as st
 from collections import Counter
+from PIL import Image
 
 import MeCab
 mecab = MeCab.Tagger()
@@ -21,6 +22,9 @@ st.markdown('　政治家って何やってるの？と思っても、、議会�
 st.markdown('　そんな人向けに、政治家の議会での発言を1枚の画像で表示してみよう！」というサービスを作ってみました（いわゆるワードクラウドというやつ）。')
 st.markdown('　対象はわたしの住んでる東京都中央区議会、期間は2022年3月時点で入手できた2015年5月から2022年5月まで。')
 #st.markdown('　python + streamlitで作ってます。超初心者の習作なもので色々ツッコミどころはあるかと思います。こうすればもっと良いよ！とか教えてもらえると嬉しいです。一緒にやろうよ！という人がいてくれるともっと嬉しいです。コメント、ツッコミはお気軽に。')
+image = Image.open('jigazo.png')
+
+st.image(image,width=100)
 st.markdown('**作った人：[ほづみゆうき](https://twitter.com/ninofku)**')
 
 logs = pd.read_csv('./gijiroku2015-2022.5.csv', encoding='UTF-8')#dataframeとしてcsvを読み込み
