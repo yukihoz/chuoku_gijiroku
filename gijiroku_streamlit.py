@@ -38,9 +38,26 @@ st.header(':clipboard: 使い方')
 st.markdown('　政治家がランダムに選択され、その政治家のテキスト解析結果が「:cake: 結果表示」に表示されてます。下の「ランダム選択」ボタンを押すと別の人に変わります。')
 st.markdown('　「:fork_and_knife: 検索条件」で条件を設定すると、政治家を選択したり「会議体」や「年度」で絞ったりなんかもできます。')
 
+# URLのクエリを習得
+query_params = st.experimental_get_query_params() 
+if query_params: 
+    option_selected_g_temp = query_params.get('giin', None)[0]
+else:option_selected_g_temp = random.choice(giin_list)
 
 # 初期表示でのランダム議員選択
-option_selected_g_temp = random.choice(giin_list)
+
+#if option_selected_g_temp:
+#    print(option_selected_g_temp)
+#else:
+#    option_selected_g_temp = random.choice(giin_list)
+# URLに繊維させたいけどようわからん。初期表示でのランダム議員選択
+#option_selected_g_temp = st.experimental_get_query_params().get('giin')
+#for list in option_selected_g_temp:
+#    print(list)
+
+
+#option_selected_g_temp = print(option_selected_g_temp[0])
+
 
 # ボタンを押すとランダムで選択
 if st.button('ランダム選択'):
@@ -63,7 +80,7 @@ if choice:
         giin_list
     )
 
-# 選択した議員の名前をURLに表示
+# 選択した議員の名前をURLに表示。表示はできるけど、URLから初期値として表示ができず
 st.experimental_set_query_params(giin=str(option_selected_g))
 
 #委員会選択
@@ -211,3 +228,4 @@ print('occurrence of substring ats:', words.count('ats'))
 
 st.header(':paperclip: 情報参照元')
 st.markdown('分析の元になっているデータは、[中央区議会 Webサイト](https://www.kugikai.city.chuo.lg.jp/index.html)の「会議録検索」からHTMLファイルをごっそりダウンロードして、その上であれこれ苦心して加工して作成しました。注意して作業はしたつもりですが、一部のデータが欠損等している可能性もありますのでご承知おきください。もし不備等ありましたら[ほづみゆうき](https://twitter.com/ninofku)まで声掛けいただけるとありがたいです。')
+
