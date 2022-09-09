@@ -61,7 +61,7 @@ else:option_selected_g_temp = random.choice(giin_list)
 
 # ボタンを押すとランダムで選択
 if st.button('ランダム選択'):
-    option_selected_g_temp = random.choice(giin_list)
+    option_selected_g = random.choice(giin_list)
 else:
     option_selected_g = option_selected_g_temp
 
