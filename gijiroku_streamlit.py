@@ -113,7 +113,7 @@ end_year = int(end_year)
 
 logs_contents_temp = logs[(logs['人分類'].str.contains(option_selected_g)) & (logs['委員会'].str.contains(option_selected_i_txt)) & (logs['内容分類']== "質問" ) & (logs['年度'] >= start_year) & (logs['年度'] <= end_year)]
 
-logs_contents_temp_show = logs_contents_temp[["年月日","会議","内容"]]
+logs_contents_temp_show = logs_contents_temp[["年月日","人分類","内容分類","質問","回答","会議","内容","年度","文字数"]]
 
 logs_contents_temp_moji = logs_contents_temp.groupby('年度').sum()# 年度ごとの文字数
 
@@ -165,45 +165,78 @@ wc.to_file('wc.png')
 st.image('wc.png')
 st.markdown('補足：更新するたびに表示位置などはビミョーに変わります。対象は名詞だけで、「それぞれ」や「問題」など、頻繁に使われるけど中身のないキーワードは除外してます。')
 
+#集計文字数表示
+st.metric(label="発言文字数", value=len(text))
+
 with st.expander("■ 年度単位での発言文字数の推移", False):
 #st.markdown('　#### :chart_with_upwards_trend: 年度単位での発言文字数の推移')
     st.markdown('　それぞれの年度でどの程度発言されているのかを推移を示したものです。')
     #チャート作成
     st.bar_chart(logs_contents_temp_moji)
-    #集計文字数表示
-    st.metric(label="発言文字数", value=len(text))
 
     #table作成
 with st.expander("■ 解析対象の文字列", False):
     #st.markdown('　#### :open_book: 解析対象の文字列')
-    st.markdown('　上記の解析結果の対象となった文字列です。もうちょい細かく見たいこともあるかと思い表示させてみました（改行がうまくできてなくてすいません…）')
+    st.markdown('　上記の解析結果の対象となった文字列です。もうちょい細かく見たいこともあるかと思い表示させてみました。')
     grid_options = {
-        "columnDefs":[
-        {
-            "headerName":"年月日",
-            "field":"年月日",
-            "suppressSizeToFit":True,
-            "autoHeight":True,
+    "columnDefs":[
+    {
+        "headerName":"年月日",
+        "field":"年月日",
+        "suppressSizeToFit":True,
+        "autoHeight":True,
 
-        },
-        {
-            "headerName":"会議名",
-            "field":"会議",
-            "suppressSizeToFit":True,
-            "wrapText":True,
-            "autoHeight":True,
-            "maxWidth":200,
-        },
-        {
-            "headerName":"発言内容",
-            "field":"内容",
-            "wrapText":True,
-            "autoHeight":True,
-            "suppressSizeToFit":True,
-            "maxWidth":800,
-        },
+    },
+    {
+        "headerName":"会議名",
+        "field":"会議",
+        "suppressSizeToFit":True,
+        "wrapText":True,
+        "autoHeight":True,
+        "maxWidth":150,
+    },
+    {
+        "headerName":"内容分類",
+        "field":"内容分類",
+        "suppressSizeToFit":True,
+        "autoHeight":True,
+
+    },
+    {
+        "headerName":"質問者",
+        "field":"質問",
+        "suppressSizeToFit":True,
+        "wrapText":True,
+        "maxWidth":100,
+        "autoHeight":True,
+
+    },
+    {
+        "headerName":"回答者",
+        "field":"回答",
+        "suppressSizeToFit":True,
+        "wrapText":True,
+        "maxWidth":100,
+        "autoHeight":True,
+
+    },
+    {
+        "headerName":"発言内容",
+        "field":"内容",
+        "wrapText":True,
+        "autoHeight":True,
+        "suppressSizeToFit":True,
+        "maxWidth":500,
+    },
+    {
+        "headerName":"人分類",
+        "field":"人分類",
+        "suppressSizeToFit":True,
+        "wrapText":True,
+        "autoHeight":True,
+    },
     ],
-    }
+}
     AgGrid(logs_contents_temp_show, grid_options)
 
 
