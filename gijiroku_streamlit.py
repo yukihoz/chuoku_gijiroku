@@ -111,7 +111,8 @@ with st.expander("■「年度」での絞り込み", False):
 start_year = int(start_year)
 end_year = int(end_year)
 
-logs_contents_temp = logs[(logs['人分類'].str.contains(option_selected_g)) & (logs['委員会'].str.contains(option_selected_i_txt)) & (logs['内容分類']== "質問" ) & (logs['年度'] >= start_year) & (logs['年度'] <= end_year)]
+#logs_contents_temp = logs[(logs['人分類'].str.contains(option_selected_g)) & (logs['委員会'].str.contains(option_selected_i_txt)) & (logs['内容分類']== "質問" ) & (logs['年度'] >= start_year) & (logs['年度'] <= end_year)]
+logs_contents_temp = logs[(logs['人分類'].str.contains(option_selected_g)) & (logs['委員会'].str.contains(option_selected_i_txt)) & (logs['年度'] >= start_year) & (logs['年度'] <= end_year)]
 
 logs_contents_temp_show = logs_contents_temp[["年月日","人分類","内容分類","質問","回答","会議","内容","年度","文字数"]]
 
@@ -119,7 +120,7 @@ logs_contents_temp_moji = logs_contents_temp.groupby('年度').sum()# 年度ご�
 
 #文字カウント
 logs_contents_temp_moji = logs_contents_temp_moji['文字数']
-
+logs_contents_temp_moji
 st.header(':cake: 結果表示')
 #st.markdown('　「:fork_and_knife: 検索条件」で設定した範囲での発言内容についての結果が表示されます。')
 
