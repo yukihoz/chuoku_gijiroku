@@ -120,7 +120,7 @@ logs_contents_temp_moji = logs_contents_temp.groupby('年度').sum()# 年度ご�
 
 #文字カウント
 logs_contents_temp_moji = logs_contents_temp_moji['文字数']
-logs_contents_temp_moji
+
 st.header(':cake: 結果表示')
 #st.markdown('　「:fork_and_knife: 検索条件」で設定した範囲での発言内容についての結果が表示されます。')
 
