@@ -10,3 +10,5 @@ mecab-python3==1.0.5
 unidic-lite==1.0.8
 click==8.0
 protobuf==3.20.3
+altair>=4.2.0
+streamlit>=1.15.0
