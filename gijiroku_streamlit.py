@@ -26,6 +26,12 @@ image = Image.open('jigazo.png')
 st.image(image,width=100)
 st.markdown('**作った人：[ほづみゆうき](https://twitter.com/ninofku)**')
 
+#議事録キャッシュ
+@st.cache_data
+def load_csv(file_path, encoding="utf-8"):
+    return pd.read_csv(file_path, encoding=encoding)
+
+logs = load_csv('./gijiroku2015-2022.5.csv')
 # 議事録CSVの読み込み
 logs = pd.read_csv('./gijiroku2015-2022.5.csv', encoding='UTF-8')
 
@@ -116,6 +122,22 @@ text = open("temp.txt", encoding="utf8").read()
 # テキストをmecabで形態素解析する
 results = mecab.parse(text)
 result = results.split('\n')[:-2][0]
+
+#エラー処理（足したところ
+try:
+    results = mecab.parse(text)
+    if not results or results.strip() == "":
+        st.error("形態素解析が失敗しました。入力テキストを確認してください。")
+        raise ValueError("形態素解析結果が空です。")
+except Exception as e:
+    st.error(f"形態素解析中にエラーが発生しました: {e}")
+    results = "解析に失敗しました"
+
+if results == "解析に失敗しました":
+    st.warning("解析が失敗したため、処理をスキップします。")
+else:
+    # 通常の処理を続行
+    result = results.split('\n')[:-2][0]
 
 # 名詞だけを抜き出す
 nouns = []
